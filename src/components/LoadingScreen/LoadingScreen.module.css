@@ -1,0 +1,108 @@
+.root {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2.5rem 3rem;
+  font-family: var(--font-mono);
+  color: #fff;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.terminal {
+  margin-bottom: 2rem;
+  font-size: 0.8rem;
+  opacity: 0.55;
+  line-height: 1.7;
+  color: #aaffcc;
+}
+
+.line {
+  animation: fadein 0.2s ease;
+}
+
+.cursor {
+  display: inline-block;
+  animation: blink 0.8s step-end infinite;
+  color: #aaffcc;
+  font-size: 0.8rem;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.barWrapper {
+  position: relative;
+  margin-bottom: 0.4rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+.barTrack {
+  position: relative;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: visible;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88 0%, #00ccff 100%);
+  transition: width 0.22s linear;
+  position: relative;
+  z-index: 2;
+}
+
+.barGlow {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 20px;
+  background: radial-gradient(ellipse, rgba(0,255,136,0.6) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 3;
+  transition: left 0.22s linear;
+}
+
+.barSegments {
+  position: absolute;
+  inset: -2px 0;
+  display: flex;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.segment {
+  flex: 1;
+  border-right: 1px solid rgba(0, 0, 0, 0.6);
+}
+
+.scanline {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 999;
+}
