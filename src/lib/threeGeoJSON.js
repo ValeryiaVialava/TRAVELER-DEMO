@@ -1,0 +1,178 @@
+// Source: https://github.com/bobbyroe/ThreeGeoJSON/tree/three-v170
+// License: BSD-2-Clause
+import * as THREE from "three";
+
+export function drawThreeGeo(json, radius, shape, materalOptions, container) {
+
+  const x_values = [];
+  const y_values = [];
+  const z_values = [];
+
+  const json_geom = createGeometryArray(json);
+  const convertCoordinates = getConversionFunctionName(shape);
+  let coordinate_array = [];
+
+  for (let geom_num = 0; geom_num < json_geom.length; geom_num++) {
+    if (json_geom[geom_num].type == 'Point') {
+      convertCoordinates(json_geom[geom_num].coordinates, radius);
+      drawParticle(x_values[0], y_values[0], z_values[0], materalOptions);
+
+    } else if (json_geom[geom_num].type == 'MultiPoint') {
+      for (let point_num = 0; point_num < json_geom[geom_num].coordinates.length; point_num++) {
+        convertCoordinates(json_geom[geom_num].coordinates[point_num], radius);
+        drawParticle(x_values[0], y_values[0], z_values[0], materalOptions);
+      }
+
+    } else if (json_geom[geom_num].type == 'LineString') {
+      coordinate_array = createCoordinateArray(json_geom[geom_num].coordinates);
+      for (let point_num = 0; point_num < coordinate_array.length; point_num++) {
+        convertCoordinates(coordinate_array[point_num], radius);
+      }
+      drawLine(x_values, y_values, z_values, materalOptions);
+
+    } else if (json_geom[geom_num].type == 'Polygon') {
+      for (let segment_num = 0; segment_num < json_geom[geom_num].coordinates.length; segment_num++) {
+        coordinate_array = createCoordinateArray(json_geom[geom_num].coordinates[segment_num]);
+        for (let point_num = 0; point_num < coordinate_array.length; point_num++) {
+          convertCoordinates(coordinate_array[point_num], radius);
+        }
+        drawLine(x_values, y_values, z_values, materalOptions);
+      }
+
+    } else if (json_geom[geom_num].type == 'MultiLineString') {
+      for (let segment_num = 0; segment_num < json_geom[geom_num].coordinates.length; segment_num++) {
+        coordinate_array = createCoordinateArray(json_geom[geom_num].coordinates[segment_num]);
+        for (let point_num = 0; point_num < coordinate_array.length; point_num++) {
+          convertCoordinates(coordinate_array[point_num], radius);
+        }
+        drawLine(x_values, y_values, z_values, materalOptions);
+      }
+
+    } else if (json_geom[geom_num].type == 'MultiPolygon') {
+      for (let polygon_num = 0; polygon_num < json_geom[geom_num].coordinates.length; polygon_num++) {
+        for (let segment_num = 0; segment_num < json_geom[geom_num].coordinates[polygon_num].length; segment_num++) {
+          coordinate_array = createCoordinateArray(json_geom[geom_num].coordinates[polygon_num][segment_num]);
+          for (let point_num = 0; point_num < coordinate_array.length; point_num++) {
+            convertCoordinates(coordinate_array[point_num], radius);
+          }
+          drawLine(x_values, y_values, z_values, materalOptions);
+        }
+      }
+    } else {
+      throw new Error('The geoJSON is not valid.');
+    }
+  }
+
+  function createGeometryArray(json) {
+    let geometry_array = [];
+    if (json.type == 'Feature') {
+      geometry_array.push(json.geometry);
+    } else if (json.type == 'FeatureCollection') {
+      for (let feature_num = 0; feature_num < json.features.length; feature_num++) {
+        geometry_array.push(json.features[feature_num].geometry);
+      }
+    } else if (json.type == 'GeometryCollection') {
+      for (let geom_num = 0; geom_num < json.geometries.length; geom_num++) {
+        geometry_array.push(json.geometries[geom_num]);
+      }
+    } else {
+      throw new Error('The geoJSON is not valid.');
+    }
+    return geometry_array;
+  }
+
+  function getConversionFunctionName(shape) {
+    if (shape == 'sphere') return convertToSphereCoords;
+    if (shape == 'plane')  return convertToPlaneCoords;
+    throw new Error('The shape that you specified is not valid.');
+  }
+
+  function createCoordinateArray(feature) {
+    const temp_array = [];
+    let interpolation_array = [];
+    for (let point_num = 0; point_num < feature.length; point_num++) {
+      const point1 = feature[point_num];
+      const point2 = feature[point_num - 1];
+      if (point_num > 0) {
+        if (needsInterpolation(point2, point1)) {
+          interpolation_array = [point2, point1];
+          interpolation_array = interpolatePoints(interpolation_array);
+          for (let inter_point_num = 0; inter_point_num < interpolation_array.length; inter_point_num++) {
+            temp_array.push(interpolation_array[inter_point_num]);
+          }
+        } else {
+          temp_array.push(point1);
+        }
+      } else {
+        temp_array.push(point1);
+      }
+    }
+    return temp_array;
+  }
+
+  function needsInterpolation(point2, point1) {
+    const lon_distance = Math.abs(point1[0] - point2[0]);
+    const lat_distance = Math.abs(point1[1] - point2[1]);
+    return lon_distance > 5 || lat_distance > 5;
+  }
+
+  function interpolatePoints(interpolation_array) {
+    let temp_array = [];
+    for (let point_num = 0; point_num < interpolation_array.length - 1; point_num++) {
+      const point1 = interpolation_array[point_num];
+      const point2 = interpolation_array[point_num + 1];
+      if (needsInterpolation(point2, point1)) {
+        temp_array.push(point1);
+        temp_array.push(getMidpoint(point1, point2));
+      } else {
+        temp_array.push(point1);
+      }
+    }
+    temp_array.push(interpolation_array[interpolation_array.length - 1]);
+    if (temp_array.length > interpolation_array.length) {
+      temp_array = interpolatePoints(temp_array);
+    }
+    return temp_array;
+  }
+
+  function getMidpoint(point1, point2) {
+    return [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
+  }
+
+  function convertToSphereCoords(coordinates_array, sphere_radius) {
+    const lon = coordinates_array[0];
+    const lat = coordinates_array[1];
+    x_values.push(Math.cos(lat * Math.PI / 180) * Math.cos(lon * Math.PI / 180) * sphere_radius);
+    y_values.push(Math.cos(lat * Math.PI / 180) * Math.sin(lon * Math.PI / 180) * sphere_radius);
+    z_values.push(Math.sin(lat * Math.PI / 180) * sphere_radius);
+  }
+
+  function convertToPlaneCoords(coordinates_array, radius) {
+    z_values.push((coordinates_array[1] / 180) * radius);
+    y_values.push((coordinates_array[0] / 180) * radius);
+  }
+
+  function drawParticle(x, y, z, options) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute([x, y, z], 3));
+    container.add(new THREE.Points(geo, new THREE.PointsMaterial(options)));
+    clearArrays();
+  }
+
+  function drawLine(x_values, y_values, z_values, options) {
+    const line_geom = new THREE.BufferGeometry();
+    const verts = [];
+    for (let i = 0; i < x_values.length; i++) {
+      verts.push(x_values[i], y_values[i], z_values[i]);
+    }
+    line_geom.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+    container.add(new THREE.Line(line_geom, new THREE.LineBasicMaterial(options)));
+    clearArrays();
+  }
+
+  function clearArrays() {
+    x_values.length = 0;
+    y_values.length = 0;
+    z_values.length = 0;
+  }
+}

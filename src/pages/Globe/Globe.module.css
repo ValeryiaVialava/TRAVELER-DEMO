@@ -11,6 +11,7 @@
   flex: 1;
   position: relative;
   height: 100%;
+  overflow: hidden;
 }
 
 /* ── Question badge ─────────────────────────────────── */
@@ -87,11 +88,12 @@
 /* ── Sidebar ────────────────────────────────────────── */
 .sidebar {
   position: relative;
+  z-index: 20;
   background: rgba(0,0,0,0.88);
   border-left: 1px solid rgba(255,255,255,0.07);
   transition: width 0.2s ease;
   padding-top: 64px;
-  overflow: hidden;
+  overflow-x: hidden;
   flex-shrink: 0;
 }
 
@@ -121,7 +123,7 @@
   padding: 1rem 1rem 1rem 2rem;
   min-width: 212px;
   overflow-y: auto;
-  max-height: calc(100vh - 64px);
+  height: calc(100vh - 80px);
 }
 
 /* ── Scanlines ──────────────────────────────────────── */
