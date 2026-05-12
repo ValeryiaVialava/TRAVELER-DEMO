@@ -38,7 +38,7 @@
   letter-spacing: 0.04em;
   color: #fff;
   margin-bottom: 1.2rem;
-  text-shadow: 0 0 40px rgba(0, 136, 255, 0.3);
+  text-shadow: 0 0 40px rgba(77, 208, 225, 0.35);
 }
 
 .subtitle {
@@ -77,7 +77,7 @@
 }
 
 .startBtn:hover {
-  box-shadow: 0 0 24px rgba(0, 255, 136, 0.35);
+  box-shadow: 0 0 24px rgba(77, 208, 225, 0.35);
 }
 
 .startBtn:active {

@@ -5,13 +5,18 @@
 }
 
 :root {
-  --color-bg: #000000;
-  --color-primary: #ffffff;
-  --color-accent: #00ff88;
-  --color-accent2: #0088ff;
-  --color-muted: #4a4a4a;
-  --color-border: rgba(255, 255, 255, 0.15);
-  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+  --color-bg: #050a14;
+  --color-bg-deep: #020308;
+  --color-primary: #c8e7ff;
+  --color-accent: #4dd0e1;
+  --color-accent2: #00d9ff;
+  --color-warn: #ffcc55;
+  --color-danger: #ff4466;
+  --color-muted: rgba(200, 231, 255, 0.35);
+  --color-border: rgba(77, 208, 225, 0.32);
+  --color-border-soft: rgba(77, 208, 225, 0.14);
+  --color-panel: rgba(5, 14, 28, 0.86);
+  --font-mono: 'Share Tech Mono', 'VT323', 'Courier New', monospace;
   --font-title: 'Orbitron', 'Share Tech Mono', monospace;
 }
 
