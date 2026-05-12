@@ -1,7 +1,7 @@
 .root {
   height: 100vh;
   width: 100%;
-  background: #000;
+  background: var(--color-bg-deep);
   display: flex;
   overflow: hidden;
   position: relative;
@@ -14,6 +14,159 @@
   overflow: hidden;
 }
 
+/* ───────────────────────────────────────────────────── */
+/* IDLE — title + START QUIZ                              */
+/* ───────────────────────────────────────────────────── */
+.idleHero {
+  position: absolute;
+  left: 50%;
+  bottom: 3rem;
+  transform: translateX(-50%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+  pointer-events: none;
+}
+
+.heroBracket {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  color: var(--color-muted);
+}
+
+.quizBtn {
+  pointer-events: auto;
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  letter-spacing: 0.22em;
+  padding: 0.75rem 1.6rem;
+  transition: all 0.15s;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(77, 208, 225, 0.08);
+}
+
+.quizBtn:hover {
+  background: rgba(77, 208, 225, 0.1);
+  box-shadow:
+    0 0 0 1px var(--color-accent),
+    0 0 28px rgba(77, 208, 225, 0.3);
+  color: var(--color-accent2);
+}
+
+.heroHint {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+}
+
+/* Idle right-side panel — label toggle only */
+.idlePanel {
+  position: absolute;
+  top: 5rem;
+  right: 1.5rem;
+  width: 200px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border-soft);
+  padding: 0.9rem 1rem;
+  pointer-events: auto;
+}
+
+/* ───────────────────────────────────────────────────── */
+/* LOADING — boot bar                                     */
+/* ───────────────────────────────────────────────────── */
+.loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 4, 10, 0.55);
+  z-index: 40;
+  animation: backdropFade 0.2s ease;
+}
+
+@keyframes backdropFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.loaderBox {
+  width: 320px;
+  border: 1px solid var(--color-border);
+  background: var(--color-panel);
+  padding: 1rem 1.2rem;
+}
+
+.loaderTitle {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--color-accent);
+  margin-bottom: 0.6rem;
+}
+
+.loaderBar {
+  height: 4px;
+  background: rgba(77, 208, 225, 0.12);
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+
+.loaderBarFill {
+  height: 100%;
+  background: var(--color-accent);
+  animation: barFill 1.05s ease-out forwards;
+  box-shadow: 0 0 8px rgba(77, 208, 225, 0.6);
+}
+
+@keyframes barFill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+.loaderMsg {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--color-muted);
+}
+
+/* ───────────────────────────────────────────────────── */
+/* PLAYING — HUD                                          */
+/* ───────────────────────────────────────────────────── */
+.exitBtn {
+  position: absolute;
+  top: 5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  padding: 0.4rem 0.85rem;
+  transition: all 0.15s;
+  z-index: 20;
+}
+.exitBtn:hover {
+  background: rgba(255, 68, 102, 0.1);
+  box-shadow: 0 0 16px rgba(255, 68, 102, 0.25);
+}
+
+.hudTop {
+  position: absolute;
+  top: 5rem;
+  left: 1.5rem;
+  width: 220px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border-soft);
+  padding: 0.85rem 1rem;
+  z-index: 20;
+}
+
 /* ── Question badge ─────────────────────────────────── */
 .questionBadge {
   position: absolute;
@@ -21,40 +174,41 @@
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  background: rgba(0,0,0,0.72);
-  border: 1px solid rgba(0, 255, 136, 0.22);
-  padding: 1rem 2.2rem;
-  backdrop-filter: blur(10px);
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  padding: 0.9rem 2.2rem;
   pointer-events: none;
   white-space: nowrap;
+  box-shadow: 0 0 24px rgba(77, 208, 225, 0.12);
 }
 
 .questionLabel {
   font-size: 0.62rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   color: var(--color-accent);
-  opacity: 0.6;
-  margin-bottom: 0.45rem;
+  opacity: 0.7;
+  margin-bottom: 0.4rem;
 }
 
 .questionName {
   font-family: var(--font-title);
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
 }
 
 .questionIso {
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.28);
-  letter-spacing: 0.12em;
-  margin-top: 0.2rem;
+  color: var(--color-muted);
+  letter-spacing: 0.18em;
+  margin-top: 0.25rem;
 }
 
 /* ── Feedback banner ────────────────────────────────── */
 .feedbackBadge {
   position: absolute;
-  top: 5rem;
+  top: 9rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.85rem;
@@ -75,55 +229,15 @@
 
 .correct {
   color: var(--color-accent);
-  border-color: rgba(0,255,136,0.3);
-  background: rgba(0,255,136,0.07);
+  border-color: var(--color-accent);
+  background: rgba(77, 208, 225, 0.08);
+  box-shadow: 0 0 18px rgba(77, 208, 225, 0.2);
 }
 
 .incorrect {
-  color: #ff4466;
-  border-color: rgba(255,68,102,0.3);
-  background: rgba(255,68,102,0.07);
-}
-
-/* ── Sidebar ────────────────────────────────────────── */
-.sidebar {
-  position: relative;
-  z-index: 20;
-  background: rgba(0,0,0,0.88);
-  border-left: 1px solid rgba(255,255,255,0.07);
-  transition: width 0.2s ease;
-  padding-top: 64px;
-  overflow-x: hidden;
-  flex-shrink: 0;
-}
-
-.sidebar.open   { width: 240px; }
-.sidebar.closed { width: 28px; }
-
-.sidebarToggle {
-  position: absolute;
-  top: 72px;
-  left: 0;
-  width: 28px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  color: rgba(255,255,255,0.28);
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.18s;
-  z-index: 10;
-}
-
-.sidebarToggle:hover { color: #fff; }
-
-.sidebarContent {
-  padding: 1rem 1rem 1rem 2rem;
-  min-width: 212px;
-  overflow-y: auto;
-  height: calc(100vh - 80px);
+  color: var(--color-danger);
+  border-color: rgba(255, 68, 102, 0.5);
+  background: rgba(255, 68, 102, 0.08);
 }
 
 /* ── Scanlines ──────────────────────────────────────── */
@@ -134,8 +248,8 @@
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.025) 2px,
-    rgba(0,0,0,0.025) 4px
+    rgba(0,0,0,0.12) 2px,
+    rgba(0,0,0,0.12) 3px
   );
   pointer-events: none;
   z-index: 1;
