@@ -1,0 +1,48 @@
+.root {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 0.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+  opacity: 0.6;
+}
+
+.percent {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.track {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  margin-bottom: 0.4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00ccff);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(0,255,136,0.5);
+}
+
+.sub {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.05em;
+}
