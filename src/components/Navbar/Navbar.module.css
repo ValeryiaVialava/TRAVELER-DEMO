@@ -1,0 +1,60 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  z-index: 100;
+  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logoImg {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.link {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.link:hover {
+  opacity: 1;
+}
+
+.loginBtn {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  opacity: 0.85;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.loginBtn:hover {
+  opacity: 1;
+  color: var(--color-accent);
+}

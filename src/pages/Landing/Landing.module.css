@@ -1,0 +1,103 @@
+.root {
+  min-height: 100vh;
+  width: 100%;
+  background: #000;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  /* 3D scene will be placed here */
+  background: radial-gradient(ellipse at 60% 40%, #050a1a 0%, #000 70%);
+}
+
+.hero {
+  position: relative;
+  z-index: 10;
+  padding: 0 3rem 4rem;
+  max-width: 640px;
+}
+
+.coords {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  opacity: 0.7;
+  margin-bottom: 1.2rem;
+}
+
+.title {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 0 40px rgba(0, 136, 255, 0.3);
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.04em;
+}
+
+.startBtn {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  padding: 0.75rem 2.5rem;
+  position: relative;
+  transition: all 0.25s;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.startBtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.startBtn:hover::before {
+  opacity: 0.1;
+}
+
+.startBtn:hover {
+  box-shadow: 0 0 24px rgba(0, 255, 136, 0.35);
+}
+
+.startBtn:active {
+  transform: scale(0.97);
+}
+
+.btnBracket {
+  opacity: 0.6;
+}
+
+.scanline {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
