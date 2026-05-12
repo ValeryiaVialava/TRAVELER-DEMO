@@ -1,5 +1,5 @@
 .root {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   background: #000;
   display: flex;
@@ -9,136 +9,93 @@
 
 .globeArea {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  height: 100%;
 }
 
-/* ---- Globe placeholder ---- */
-.globePlaceholder {
-  position: relative;
-  width: 420px;
-  height: 420px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.globeRing {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  box-shadow:
-    0 0 60px rgba(0, 136, 255, 0.08) inset,
-    0 0 40px rgba(0, 255, 136, 0.06);
-  animation: rotateSlow 20s linear infinite;
-}
-
-@keyframes rotateSlow {
-  to { transform: rotate(360deg); }
-}
-
-.globeCore {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.globeText {
-  font-family: var(--font-title);
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: rgba(255,255,255,0.12);
-}
-
-.globeSub {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.2);
-  letter-spacing: 0.06em;
-}
-
-/* ---- Question badge ---- */
+/* ── Question badge ─────────────────────────────────── */
 .questionBadge {
   position: absolute;
-  bottom: 3rem;
+  bottom: 2.5rem;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  background: rgba(0,0,0,0.7);
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  padding: 1rem 2rem;
-  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.72);
+  border: 1px solid rgba(0, 255, 136, 0.22);
+  padding: 1rem 2.2rem;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .questionLabel {
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
   color: var(--color-accent);
   opacity: 0.6;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
 .questionName {
   font-family: var(--font-title);
-  font-size: 1.6rem;
+  font-size: 1.55rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .questionIso {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.3);
-  letter-spacing: 0.1em;
-  margin-top: 0.25rem;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.28);
+  letter-spacing: 0.12em;
+  margin-top: 0.2rem;
 }
 
-/* ---- Feedback ---- */
+/* ── Feedback banner ────────────────────────────────── */
 .feedbackBadge {
   position: absolute;
   top: 5rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.9rem;
-  letter-spacing: 0.12em;
-  padding: 0.5rem 1.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  padding: 0.55rem 1.6rem;
   border: 1px solid;
-  animation: feedbackPop 1.2s ease forwards;
+  white-space: nowrap;
+  animation: feedbackPop 1.6s ease forwards;
+  pointer-events: none;
 }
 
 @keyframes feedbackPop {
-  0%   { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
-  80%  { opacity: 1; }
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  12%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
 .correct {
   color: var(--color-accent);
   border-color: rgba(0,255,136,0.3);
-  background: rgba(0,255,136,0.06);
+  background: rgba(0,255,136,0.07);
 }
 
 .incorrect {
   color: #ff4466;
   border-color: rgba(255,68,102,0.3);
-  background: rgba(255,68,102,0.06);
+  background: rgba(255,68,102,0.07);
 }
 
-/* ---- Sidebar ---- */
+/* ── Sidebar ────────────────────────────────────────── */
 .sidebar {
   position: relative;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.88);
   border-left: 1px solid rgba(255,255,255,0.07);
   transition: width 0.2s ease;
   padding-top: 64px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
-.sidebar.open  { width: 240px; }
+.sidebar.open   { width: 240px; }
 .sidebar.closed { width: 28px; }
 
 .sidebarToggle {
@@ -146,28 +103,28 @@
   top: 72px;
   left: 0;
   width: 28px;
-  height: 28px;
+  height: 32px;
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.3);
-  font-size: 0.75rem;
-  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.28);
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: color 0.18s;
   z-index: 10;
 }
 
-.sidebarToggle:hover {
-  color: #fff;
-}
+.sidebarToggle:hover { color: #fff; }
 
 .sidebarContent {
   padding: 1rem 1rem 1rem 2rem;
   min-width: 212px;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px);
 }
 
+/* ── Scanlines ──────────────────────────────────────── */
 .scanline {
   position: fixed;
   inset: 0;
@@ -175,8 +132,8 @@
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
+    rgba(0,0,0,0.025) 2px,
+    rgba(0,0,0,0.025) 4px
   );
   pointer-events: none;
   z-index: 1;

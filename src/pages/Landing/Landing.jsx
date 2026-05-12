@@ -19,19 +19,19 @@ export default function Landing() {
     <div className={styles.root}>
       <Navbar />
 
-      {/* 3D space scene goes here in future */}
+      {/* 3D space scene will be placed here */}
       <div className={styles.scene} />
 
       <div className={styles.hero}>
         <p className={styles.coords}>// 48.8566° N, 2.3522° E — SECTOR EARTH-3</p>
-        <h1 className={styles.title}>Добро пожаловать<br />на Землю</h1>
+        <h1 className={styles.title}>Welcome to Earth</h1>
         <p className={styles.subtitle}>
-          Вы прибыли. Планета идентифицирована.<br />
-          Начните изучение политической карты.
+          You have arrived. Planet identified.<br />
+          Begin your study of the political map.
         </p>
         <button className={styles.startBtn} onClick={handleStart}>
           <span className={styles.btnBracket}>[</span>
-          &nbsp;НАЧАТЬ&nbsp;
+          &nbsp;START&nbsp;
           <span className={styles.btnBracket}>]</span>
         </button>
       </div>

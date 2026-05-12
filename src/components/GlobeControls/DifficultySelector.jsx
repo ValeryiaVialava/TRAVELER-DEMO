@@ -7,7 +7,7 @@ export default function DifficultySelector() {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.label}>// УРОВЕНЬ</div>
+      <div className={styles.label}>// DIFFICULTY</div>
       {Object.entries(DIFFICULTIES).map(([key, { label, description }]) => (
         <button
           key={key}

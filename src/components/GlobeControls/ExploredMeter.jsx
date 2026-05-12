@@ -7,17 +7,14 @@ export default function ExploredMeter() {
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <span className={styles.label}>// ИССЛЕДОВАНО</span>
+        <span className={styles.label}>// EXPLORED</span>
         <span className={styles.percent}>{exploredPercent}%</span>
       </div>
       <div className={styles.track}>
-        <div
-          className={styles.fill}
-          style={{ width: `${exploredPercent}%` }}
-        />
+        <div className={styles.fill} style={{ width: `${exploredPercent}%` }} />
       </div>
       <div className={styles.sub}>
-        {memorizedCount} / {state.totalCountries} стран запомнено
+        {memorizedCount} / {state.totalCountries} countries memorized
       </div>
     </div>
   )

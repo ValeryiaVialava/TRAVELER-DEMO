@@ -7,7 +7,7 @@ export default function RegionSelector() {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.label}>// РЕГИОН</div>
+      <div className={styles.label}>// REGION</div>
       {Object.entries(REGIONS).map(([key, { label, emoji }]) => (
         <button
           key={key}

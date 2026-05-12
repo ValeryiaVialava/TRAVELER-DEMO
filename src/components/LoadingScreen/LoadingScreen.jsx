@@ -13,7 +13,6 @@ const BOOT_LINES = [
 export default function LoadingScreen() {
   const [progress, setProgress] = useState(0)
   const [lineIndex, setLineIndex] = useState(0)
-  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -48,14 +47,8 @@ export default function LoadingScreen() {
           // Welcome to Earth 2026 [..] &nbsp; Loading...{Math.floor(progress)}%
         </div>
         <div className={styles.barTrack}>
-          <div
-            className={styles.barFill}
-            style={{ width: `${progress}%` }}
-          />
-          <div
-            className={styles.barGlow}
-            style={{ left: `${progress}%` }}
-          />
+          <div className={styles.barFill} style={{ width: `${progress}%` }} />
+          <div className={styles.barGlow} style={{ left: `${progress}%` }} />
         </div>
         <div className={styles.barSegments}>
           {Array.from({ length: 40 }).map((_, i) => (

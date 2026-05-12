@@ -2,9 +2,9 @@ import { useGame } from '../../context/GameContext.jsx'
 import styles from './GlobeControls.module.css'
 
 const MODES = [
-  { key: 'always', label: 'Всегда показывать' },
-  { key: 'hover',  label: 'При наведении' },
-  { key: 'none',   label: 'Скрыть названия' },
+  { key: 'always', label: 'Always show' },
+  { key: 'hover',  label: 'Show on hover' },
+  { key: 'none',   label: 'Hide labels' },
 ]
 
 export default function LabelToggle() {
@@ -12,7 +12,7 @@ export default function LabelToggle() {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.label}>// НАЗВАНИЯ СТРАН</div>
+      <div className={styles.label}>// COUNTRY LABELS</div>
       {MODES.map(({ key, label }) => (
         <button
           key={key}
