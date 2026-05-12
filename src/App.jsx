@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+// HashRouter — robust on GitHub Pages (no 404.html fallback dance needed)
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { UserProvider, useUser } from './context/UserContext.jsx'
 import { GameProvider } from './context/GameContext.jsx'
@@ -30,7 +31,7 @@ export default function App() {
   if (booting) return <LoadingScreen />
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <UserProvider>
         <GameProvider>
           <Routes>
@@ -41,6 +42,6 @@ export default function App() {
           </Routes>
         </GameProvider>
       </UserProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
