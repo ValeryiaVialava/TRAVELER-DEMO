@@ -1,17 +1,23 @@
 import { useRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js'
 import earcut from 'earcut'
 import { drawThreeGeo } from '../../lib/threeGeoJSON.js'
 import { useGame } from '../../context/GameContext.jsx'
+import { COUNTRY_DATA } from '../../data/countries.js'
 
-// GeoJSON from https://github.com/martynafford/natural-earth-geojson
 const GEOJSON_URL =
   'https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/50m/cultural/ne_50m_admin_0_countries.json'
 
 let geoJsonCache = null
 
-// Coordinate convention must match threeGeoJSON.js convertToSphereCoords
+const ISO_NAME       = new Map(COUNTRY_DATA.map(c => [c.iso, c.name]))
+const ISO_TIER       = new Map(COUNTRY_DATA.map(c => [c.iso, c.tier]))
+// All valid game ISOs — used to distinguish "other-region country" from
+// "unrecognized territory" so we can blend the latter into the globe.
+const ALL_GAME_ISOS  = new Set(COUNTRY_DATA.map(c => c.iso))
+
 function geoToVec3(lon, lat, r) {
   const φ = lat * (Math.PI / 180)
   const λ = lon * (Math.PI / 180)
@@ -22,8 +28,6 @@ function geoToVec3(lon, lat, r) {
   )
 }
 
-// Remove antimeridian jumps by unwrapping consecutive lon deltas > 180°
-// (same idea as phase-unwrapping in signal processing)
 function unwrapRing(ring) {
   const out = [[ring[0][0], ring[0][1]]]
   for (let i = 1; i < ring.length; i++) {
@@ -36,7 +40,6 @@ function unwrapRing(ring) {
   return out
 }
 
-// Signed area in lon/lat space — positive = CCW
 function signedArea(ring) {
   let a = 0
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
@@ -45,10 +48,6 @@ function signedArea(ring) {
   return a
 }
 
-// Recursively split a triangle in lon/lat space until every edge is short
-// enough that, after projection to the sphere, the triangle's interior chord
-// stays above the base sphere surface. Without this, big earcut triangles dip
-// below r=1 and disappear behind the base sphere — visible as black holes.
 function emitTri(a, b, c, maxStep, r, out) {
   const eAB = Math.hypot(b[0] - a[0], b[1] - a[1])
   const eBC = Math.hypot(c[0] - b[0], c[1] - b[1])
@@ -87,14 +86,11 @@ function buildCountryMesh(feature, r) {
   const MAX_EDGE_DEG = 2
 
   for (const polygon of polygons) {
-    // GeoJSON rings close by repeating first point — earcut needs open ring
     let ring = polygon[0]?.slice(0, -1)
     if (!ring || ring.length < 3) continue
 
-    // Unwrap antimeridian so earcut never sees a >180° lon jump
     ring = unwrapRing(ring)
 
-    // Guarantee CCW winding → outward-facing normals after sphere projection
     if (signedArea(ring) < 0) ring = ring.slice().reverse()
 
     const flat2D = ring.flatMap(([lo, la]) => [lo, la])
@@ -118,9 +114,46 @@ function buildCountryMesh(feature, r) {
   )
 }
 
+// Natural Earth label coords (LABEL_X / LABEL_Y props) when present,
+// else fall back to the polygon's average vertex position.
+function featureLabelPos(feat) {
+  const p = feat.properties
+  if (typeof p.LABEL_X === 'number' && typeof p.LABEL_Y === 'number')
+    return [p.LABEL_X, p.LABEL_Y]
+  const coords =
+    feat.geometry.type === 'Polygon'       ? feat.geometry.coordinates[0]
+    : feat.geometry.type === 'MultiPolygon' ? feat.geometry.coordinates[0][0]
+    : null
+  if (!coords?.length) return [0, 0]
+  let lo = 0, la = 0
+  coords.forEach(([x, y]) => { lo += x; la += y })
+  return [lo / coords.length, la / coords.length]
+}
+
+function makeLabel(name) {
+  const el = document.createElement('div')
+  el.textContent = name
+  el.style.cssText = [
+    'color:rgba(160,210,255,.9)',
+    'font-family:Courier New,monospace',
+    'font-size:11px',
+    'letter-spacing:.07em',
+    'text-transform:uppercase',
+    'padding:1px 5px',
+    'background:rgba(3,10,22,.65)',
+    'border:1px solid rgba(30,90,180,.4)',
+    'border-radius:2px',
+    'pointer-events:none',
+    'white-space:nowrap',
+    'line-height:1.5',
+    'text-shadow:0 1px 4px rgba(0,0,0,.8)',
+  ].join(';')
+  return el
+}
+
 const COL = {
   bg:        0x0d1b2a,
-  inRegion:  0x162a48,  // belongs to selected region but excluded by difficulty
+  inRegion:  0x162a48,
   inGame:    0x1e3a5f,
   question:  0x005599,
   memorized: 0x005533,
@@ -138,13 +171,15 @@ function applyColors(group, { currentQuestion, correctHighlight, gameState, regi
     else if (d?.memorized)                 hex = COL.memorized
     else if (d)                            hex = COL.inGame
     else if (regionSet?.has(iso))          hex = COL.inRegion
+    // Territories present in GeoJSON but absent from COUNTRY_DATA (e.g. Puerto
+    // Rico, Curaçao) have no regionSet entry and would render as COL.bg creating
+    // visible dark holes. Blend them into the globe instead.
+    else if (!ALL_GAME_ISOS.has(iso))      hex = COL.inRegion
 
     mesh.material.color.setHex(hex)
   })
 }
 
-// Approx geographic centroids per region — used to point the camera at the
-// area the user is choosing in the setup overlay.
 const REGION_FOCUS = {
   all:      { lon:   0, lat:   0, dist: 3.0 },
   europe:   { lon:  15, lat:  50, dist: 2.4 },
@@ -164,16 +199,15 @@ function geoToCameraPos(lon, lat, dist) {
   )
 }
 
-export default function Globe3D({ currentQuestion, correctHighlight, onCountryClick, regionISOs, onMeshesReady, focusRegion, autoRotate = true }) {
+export default function Globe3D({ currentQuestion, correctHighlight, onCountryClick, regionISOs, onMeshesReady, focusRegion, autoRotate = false, forceHideLabels = false }) {
   const mountRef  = useRef()
   const refs      = useRef({})
   const liveProps = useRef({})
   const { state: gameState } = useGame()
   const regionSet = useMemo(() => new Set(regionISOs ?? []), [regionISOs])
 
-  // Keep live snapshot for event handlers without re-registering them
   useEffect(() => {
-    liveProps.current = { currentQuestion, correctHighlight, onCountryClick, gameState, regionSet }
+    liveProps.current = { currentQuestion, correctHighlight, onCountryClick, gameState, regionSet, forceHideLabels }
   })
 
   // ── Init Three.js scene (runs once) ─────────────────────
@@ -187,28 +221,31 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     renderer.setSize(W, H)
     mount.appendChild(renderer.domElement)
 
+    // CSS2D overlay for country name labels
+    const css2dRenderer = new CSS2DRenderer()
+    css2dRenderer.setSize(W, H)
+    css2dRenderer.domElement.style.cssText =
+      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden'
+    mount.appendChild(css2dRenderer.domElement)
+
     const scene  = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100)
-    // threeGeoJSON coords: X → (0°N,0°E), Y → (0°N,90°E), Z → North Pole
-    // Camera on +X axis looks at Africa/Europe; up = Z (North Pole)
     camera.position.set(2.8, 0, 0)
     camera.up.set(0, 0, 1)
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping    = true
     controls.dampingFactor    = 0.06
-    controls.autoRotate       = true
+    controls.autoRotate       = false
     controls.autoRotateSpeed  = 0.4
     controls.minDistance      = 1.4
     controls.maxDistance      = 5.5
 
-    // Base sphere
     scene.add(new THREE.Mesh(
       new THREE.SphereGeometry(1, 64, 64),
       new THREE.MeshPhongMaterial({ color: 0x020b18, emissive: 0x000308, shininess: 8 }),
     ))
 
-    // Lighting
     scene.add(new THREE.AmbientLight(0x223355, 1.5))
     const sun = new THREE.DirectionalLight(0x5588cc, 1.2)
     sun.position.set(5, 3, 5)
@@ -219,7 +256,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     scene.add(countryGroup)
     scene.add(borderGroup)
 
-    refs.current = { renderer, camera, controls, countryGroup }
+    refs.current = { renderer, css2dRenderer, camera, controls, countryGroup, labelMap: new Map(), hoveredIso: null }
 
     // ── Load GeoJSON ───────────────────────────────────────
     ;(async () => {
@@ -228,37 +265,46 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
         geoJsonCache = await res.json()
       }
 
-      // Border lines via threeGeoJSON (bobbyroe/ThreeGeoJSON)
       drawThreeGeo(geoJsonCache, 1.003, 'sphere', { color: 0x1a44aa }, borderGroup)
 
-      // Natural Earth uses some non-ISO 3-letter codes; map them to the
-      // codes we use in COUNTRY_DATA so meshes match game records.
       const ISO_ALIASES = {
-        SAH: 'ESH',  // Western Sahara: NE uses SAH, ISO 3166 uses ESH
-        SOL: 'SOM',  // Somaliland: NE lists it separately; merge into Somalia
-        SDS: 'SSD',  // older NE used SDS for South Sudan
-        KOS: 'KOS',  // Kosovo (already aligned, kept for clarity)
+        SAH: 'ESH',
+        SOL: 'SOM',
+        SDS: 'SSD',
+        KOS: 'KOS',
       }
 
-      // Filled meshes for coloring + raycasting
+      const LABEL_R = 1.016
+
       for (const feat of geoJsonCache.features) {
-        // Natural Earth puts '-99' in ISO_A3 for disputed cases (France,
-        // Kosovo, N. Cyprus, etc.). ADM0_A3 reliably holds the 3-letter code.
         const p = feat.properties
         let iso = (p?.ISO_A3 && p.ISO_A3 !== '-99') ? p.ISO_A3 : p?.ADM0_A3
         if (!iso || iso === '-99') continue
         iso = ISO_ALIASES[iso] ?? iso
+
         const mesh = buildCountryMesh(feat, 1.001)
         if (!mesh) continue
         mesh.userData.iso = iso
         countryGroup.add(mesh)
+
+        // One label per ISO — skip duplicates (e.g. Somaliland SOL→SOM would
+        // create a second CSS2DObject for SOM that stays visible forever because
+        // the tick loop only updates the entry in labelMap).
+        if (!refs.current.labelMap.has(iso)) {
+          const name = ISO_NAME.get(iso) ?? p?.NAME ?? iso
+          const [lon, lat] = featureLabelPos(feat)
+          const el  = makeLabel(name)
+          const obj = new CSS2DObject(el)
+          obj.position.copy(geoToVec3(lon, lat, LABEL_R))
+          // Start on layer 1 so CSS2DRenderer hides it until the tick loop
+          // decides it should be visible (layer 0 = visible to camera).
+          obj.layers.set(1)
+          scene.add(obj)
+          refs.current.labelMap.set(iso, obj)
+        }
       }
 
       applyColors(countryGroup, liveProps.current)
-
-      // Tell the parent which countries actually got rendered — micro-states
-      // too small for the 50m GeoJSON may have no mesh, and would otherwise
-      // appear as unanswerable questions.
       onMeshesReady?.(new Set(countryGroup.children.map(m => m.userData.iso)))
     })()
 
@@ -269,16 +315,19 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
+      css2dRenderer.setSize(w, h)
     })
     ro.observe(mount)
 
-    // ── Pointer: distinguish drag from click ───────────────
+    // ── Pointer events ─────────────────────────────────────
     let downX = 0, downY = 0
+
     const onPointerDown = e => { downX = e.clientX; downY = e.clientY }
-    const onPointerUp   = e => {
+
+    const onPointerUp = e => {
       const dx = e.clientX - downX
       const dy = e.clientY - downY
-      if (dx * dx + dy * dy > 25) return          // dragging — ignore
+      if (dx * dx + dy * dy > 25) return
 
       const rect  = mount.getBoundingClientRect()
       const mouse = new THREE.Vector2(
@@ -293,15 +342,67 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
         liveProps.current.onCountryClick(hits[0].object.userData.iso)
       }
     }
+
+    const onPointerMove = e => {
+      const rect  = mount.getBoundingClientRect()
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width)  *  2 - 1,
+        ((e.clientY - rect.top)  / rect.height) * -2 + 1,
+      )
+      const ray = new THREE.Raycaster()
+      ray.setFromCamera(mouse, camera)
+      const hits = ray.intersectObjects(refs.current.countryGroup?.children ?? [])
+      refs.current.hoveredIso = hits.length ? hits[0].object.userData.iso : null
+    }
+
     mount.addEventListener('pointerdown', onPointerDown)
     mount.addEventListener('pointerup',   onPointerUp)
+    mount.addEventListener('pointermove', onPointerMove)
 
     // ── Render loop ────────────────────────────────────────
     let raf
+
     const tick = () => {
       raf = requestAnimationFrame(tick)
       controls.update()
+
+      // Update label visibility every frame.
+      // We use obj.layers to control visibility:
+      //   layer 0 = visible to camera  (CSS2DRenderer shows)
+      //   layer 1 = invisible to camera (CSS2DRenderer hides via layers check)
+      // obj.visible is NOT used — CSS2DRenderer's hideObject path skips children
+      // which can leave orphaned elements; layers are checked per-object and are
+      // the safest flag CSS2DRenderer always respects.
+      const { labelMap, hoveredIso } = refs.current
+      if (labelMap.size) {
+        const forceHideLabels = liveProps.current.forceHideLabels
+        const labelMode = forceHideLabels ? 'none' : (liveProps.current.gameState?.labelMode ?? 'always')
+        const camDir  = camera.position.clone().normalize()
+        const camDist = camera.position.length()
+        // Zoom-based detail levels:
+        // zoomed out (> 3.3): tier 1 (large countries only)
+        // default (~2.8): tier 1 + 2
+        // zoomed in (< 2.2): tier 1 + 2 + 3 (small countries too)
+        const tierLimit = camDist > 3.3 ? 1 : (camDist < 2.2 ? 3 : 2)
+
+        labelMap.forEach((obj, iso) => {
+          let show = false
+          if (labelMode === 'always') {
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.3
+            const tier    = ISO_TIER.get(iso) ?? 2
+            show = onFront && tier <= tierLimit
+          } else if (labelMode === 'hover') {
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.3
+            show = onFront && iso === hoveredIso
+          }
+          // 'none' → show stays false
+          const wantLayer = show ? 0 : 1
+          if (obj.layers.mask !== (1 << wantLayer)) obj.layers.set(wantLayer)
+        })
+      }
+
       renderer.render(scene, camera)
+      css2dRenderer.render(scene, camera)
     }
     tick()
 
@@ -310,8 +411,10 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
       ro.disconnect()
       mount.removeEventListener('pointerdown', onPointerDown)
       mount.removeEventListener('pointerup',   onPointerUp)
+      mount.removeEventListener('pointermove', onPointerMove)
       renderer.dispose()
-      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)
+      if (mount.contains(renderer.domElement))    mount.removeChild(renderer.domElement)
+      if (mount.contains(css2dRenderer.domElement)) mount.removeChild(css2dRenderer.domElement)
     }
   }, [])
 
@@ -344,7 +447,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     controls.autoRotate = false
     const step = () => {
       const t = Math.min(1, (performance.now() - t0) / dur)
-      const ease = 1 - Math.pow(1 - t, 3)   // easeOutCubic
+      const ease = 1 - Math.pow(1 - t, 3)
       camera.position.lerpVectors(from, to, ease)
       camera.lookAt(0, 0, 0)
       if (t < 1) raf = requestAnimationFrame(step)
@@ -354,5 +457,5 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     return () => cancelAnimationFrame(raf)
   }, [focusRegion])
 
-  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+  return <div ref={mountRef} style={{ position: 'relative', width: '100%', height: '100%' }} />
 }

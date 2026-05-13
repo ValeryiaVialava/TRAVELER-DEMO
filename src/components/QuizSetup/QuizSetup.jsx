@@ -46,14 +46,13 @@ export default function QuizSetup({ initialRegion, initialDifficulty, onCancel, 
         <section className={styles.section}>
           <div className={styles.sectionLabel}>// REGION OF STUDY</div>
           <div className={styles.regionGrid}>
-            {Object.entries(REGIONS).map(([key, { label, emoji }]) => (
+            {Object.entries(REGIONS).map(([key, { label }]) => (
               <button
                 key={key}
                 className={`${styles.regionCard} ${region === key ? styles.regionActive : ''}`}
                 onClick={() => selectRegion(key)}
                 onMouseEnter={() => onPreviewRegion?.(key)}
               >
-                <div className={styles.regionEmoji}>{emoji}</div>
                 <div className={styles.regionLabel}>{label}</div>
                 <div className={styles.regionHint}>
                   {REGION_HINTS[key]?.[0]}<br />

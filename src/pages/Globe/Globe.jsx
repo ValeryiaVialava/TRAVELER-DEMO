@@ -33,9 +33,10 @@ export default function Globe() {
     return pool.filter(c => renderedISOs.has(c.iso))
   }, [state.region, state.difficulty, renderedISOs])
 
-  const regionISOs = state.region === 'all'
+  const effectiveRegion = stage === STAGES.idle ? 'all' : (previewRegion ?? state.region)
+  const regionISOs = effectiveRegion === 'all'
     ? COUNTRY_DATA.map(c => c.iso)
-    : COUNTRY_DATA.filter(c => c.region === state.region).map(c => c.iso)
+    : COUNTRY_DATA.filter(c => c.region === effectiveRegion).map(c => c.iso)
 
   // Initialize the country pool whenever the region/difficulty change or the
   // globe finishes loading. Saved progress is merged in by the reducer.
@@ -101,8 +102,9 @@ export default function Globe() {
     ? (previewRegion ?? state.region ?? 'all')
     : (stage === STAGES.playing ? state.region : null)
 
-  // Autorotate only when idle — pause during setup/play so the user can focus
-  const autoRotate = stage === STAGES.idle
+  // Autorotate disabled by default per user request
+  const autoRotate = false
+  const hideLabels = stage !== STAGES.idle
 
   return (
     <div className={styles.root}>
@@ -117,6 +119,7 @@ export default function Globe() {
           onMeshesReady={setRenderedISOs}
           focusRegion={focusRegion}
           autoRotate={autoRotate}
+          forceHideLabels={hideLabels}
         />
 
         {/* ─── IDLE: globe + minimal controls + QUIZ trigger ─── */}
