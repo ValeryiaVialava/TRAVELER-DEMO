@@ -296,7 +296,9 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
           const el  = makeLabel(name)
           const obj = new CSS2DObject(el)
           obj.position.copy(geoToVec3(lon, lat, LABEL_R))
-          obj.element.style.visibility = 'hidden'
+          // Start on layer 1 so CSS2DRenderer hides it until the tick loop
+          // decides it should be visible (layer 0 = visible to camera).
+          obj.layers.set(1)
           scene.add(obj)
           refs.current.labelMap.set(iso, obj)
         }
@@ -383,18 +385,17 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
         // zoomed in (< 2.2): tier 1 + 2 + 3 (small countries too)
         const tierLimit = camDist > 3.3 ? 1 : (camDist < 2.2 ? 3 : 2)
 
-        labelMap.forEach((obj, iso) => {
-          let show = false
           if (labelMode === 'always') {
-            const onFront = obj.position.clone().normalize().dot(camDir) > 0.4
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.3
             const tier    = ISO_TIER.get(iso) ?? 2
             show = onFront && tier <= tierLimit
           } else if (labelMode === 'hover') {
-            const onFront = obj.position.clone().normalize().dot(camDir) > 0.4
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.3
             show = onFront && iso === hoveredIso
           }
           // 'none' → show stays false
-          obj.element.style.visibility = show ? 'visible' : 'hidden'
+          const wantLayer = show ? 0 : 1
+          if (obj.layers.mask !== (1 << wantLayer)) obj.layers.set(wantLayer)
         })
       }
 
