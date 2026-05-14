@@ -457,5 +457,5 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     return () => cancelAnimationFrame(raf)
   }, [focusRegion])
 
-  return <div ref={mountRef} style={{ position: 'relative', width: '100%', height: '100%' }} />
+  return <div ref={mountRef} style={{ position: 'relative', width: '100%', height: '100%', zIndex: 0 }} />
 }
