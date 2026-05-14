@@ -386,11 +386,11 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
         labelMap.forEach((obj, iso) => {
           let show = false
           if (labelMode === 'always') {
-            const onFront = obj.position.clone().normalize().dot(camDir) > 0.3
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.55
             const tier    = ISO_TIER.get(iso) ?? 2
             show = onFront && tier <= tierLimit
           } else if (labelMode === 'hover') {
-            const onFront = obj.position.clone().normalize().dot(camDir) > 0.3
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.55
             show = onFront && iso === hoveredIso
           }
           // 'none' → show stays false
