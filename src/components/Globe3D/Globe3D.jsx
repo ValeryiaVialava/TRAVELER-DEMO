@@ -147,6 +147,8 @@ function makeLabel(name) {
     'white-space:nowrap',
     'line-height:1.5',
     'text-shadow:0 1px 4px rgba(0,0,0,.8)',
+    'opacity:0',
+    'transition:opacity 0.15s',
   ].join(';')
   return el
 }
@@ -296,9 +298,6 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
           const el  = makeLabel(name)
           const obj = new CSS2DObject(el)
           obj.position.copy(geoToVec3(lon, lat, LABEL_R))
-          // Keep on layer 0 so CSS2DRenderer always adds the element to the DOM;
-          // we control visibility via display style in the tick loop.
-          obj.element.style.display = 'none'
           scene.add(obj)
           refs.current.labelMap.set(iso, obj)
         }
@@ -396,7 +395,8 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
             show = onFront && iso === hoveredIso
           }
           // 'none' → show stays false
-          obj.element.style.display = show ? '' : 'none'
+          obj.visible = true
+          obj.element.style.opacity = show ? '1' : '0'
         })
       }
 
