@@ -225,7 +225,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     const css2dRenderer = new CSS2DRenderer()
     css2dRenderer.setSize(W, H)
     css2dRenderer.domElement.style.cssText =
-      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:1;'
+      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden'
     mount.appendChild(css2dRenderer.domElement)
 
     const scene  = new THREE.Scene()
@@ -296,9 +296,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
           const el  = makeLabel(name)
           const obj = new CSS2DObject(el)
           obj.position.copy(geoToVec3(lon, lat, LABEL_R))
-          // Start on layer 1 so CSS2DRenderer hides it until the tick loop
-          // decides it should be visible (layer 0 = visible to camera).
-          obj.layers.set(1)
+          obj.element.style.visibility = 'hidden'
           scene.add(obj)
           refs.current.labelMap.set(iso, obj)
         }
@@ -396,8 +394,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
             show = onFront && iso === hoveredIso
           }
           // 'none' → show stays false
-          const wantLayer = show ? 0 : 1
-          if (obj.layers.mask !== (1 << wantLayer)) obj.layers.set(wantLayer)
+          obj.element.style.visibility = show ? 'visible' : 'hidden'
         })
       }
 
@@ -457,5 +454,5 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     return () => cancelAnimationFrame(raf)
   }, [focusRegion])
 
-  return <div ref={mountRef} style={{ position: 'relative', width: '100%', height: '100%', zIndex: 0 }} />
+  return <div ref={mountRef} style={{ position: 'relative', width: '100%', height: '100%' }} />
 }
