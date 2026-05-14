@@ -296,9 +296,9 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
           const el  = makeLabel(name)
           const obj = new CSS2DObject(el)
           obj.position.copy(geoToVec3(lon, lat, LABEL_R))
-          // Start on layer 1 so CSS2DRenderer hides it until the tick loop
-          // decides it should be visible (layer 0 = visible to camera).
-          obj.layers.set(1)
+          // Keep on layer 0 so CSS2DRenderer always adds the element to the DOM;
+          // we control visibility via display style in the tick loop.
+          obj.element.style.display = 'none'
           scene.add(obj)
           refs.current.labelMap.set(iso, obj)
         }
@@ -396,8 +396,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
             show = onFront && iso === hoveredIso
           }
           // 'none' → show stays false
-          const wantLayer = show ? 0 : 1
-          if (obj.layers.mask !== (1 << wantLayer)) obj.layers.set(wantLayer)
+          obj.element.style.display = show ? '' : 'none'
         })
       }
 
