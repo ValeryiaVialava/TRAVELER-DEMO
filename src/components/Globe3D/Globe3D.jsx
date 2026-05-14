@@ -225,7 +225,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     const css2dRenderer = new CSS2DRenderer()
     css2dRenderer.setSize(W, H)
     css2dRenderer.domElement.style.cssText =
-      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden'
+      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:1;'
     mount.appendChild(css2dRenderer.domElement)
 
     const scene  = new THREE.Scene()

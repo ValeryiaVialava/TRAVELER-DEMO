@@ -19,7 +19,7 @@ const TIER_WEIGHTS = {
 const initialState = {
   difficulty: 'normal',
   region: 'all',
-  labelMode: 'hover',      // 'always' | 'hover' | 'none'
+  labelMode: 'always',      // 'always' | 'hover' | 'none'
   countries: {},           // { [iso]: { correct: 0, incorrect: 0, streak: 0, memorized: false } }
   totalCountries: 0,
 }
