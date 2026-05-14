@@ -2,7 +2,7 @@ import { useGame } from '../../context/GameContext.jsx'
 import styles from './GlobeControls.module.css'
 
 const MODES = [
-  { key: 'always', label: 'Always show' },
+  { key: 'always', label: 'Show' },
   { key: 'hover',  label: 'Show on hover' },
   { key: 'none',   label: 'Hide labels' },
 ]
