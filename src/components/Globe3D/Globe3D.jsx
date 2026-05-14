@@ -225,7 +225,7 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
     const css2dRenderer = new CSS2DRenderer()
     css2dRenderer.setSize(W, H)
     css2dRenderer.domElement.style.cssText =
-      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden'
+      'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:1;'
     mount.appendChild(css2dRenderer.domElement)
 
     const scene  = new THREE.Scene()
@@ -386,11 +386,10 @@ export default function Globe3D({ currentQuestion, correctHighlight, onCountryCl
         labelMap.forEach((obj, iso) => {
           let show = false
           if (labelMode === 'always') {
-            const onFront = obj.position.clone().normalize().dot(camDir) > 0.55
-            const tier    = ISO_TIER.get(iso) ?? 2
-            show = onFront && tier <= tierLimit
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.2
+            show = onFront
           } else if (labelMode === 'hover') {
-            const onFront = obj.position.clone().normalize().dot(camDir) > 0.55
+            const onFront = obj.position.clone().normalize().dot(camDir) > 0.2
             show = onFront && iso === hoveredIso
           }
           // 'none' → show stays false
