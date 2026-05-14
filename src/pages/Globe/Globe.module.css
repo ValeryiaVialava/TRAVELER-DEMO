@@ -72,10 +72,10 @@
   right: 1.5rem;
   width: 200px;
   background: var(--color-panel);
-  border: 1px solid var(--color-border-soft);
   padding: 0.9rem 1rem;
   pointer-events: auto;
   z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 /* ───────────────────────────────────────────────────── */
@@ -102,6 +102,7 @@
   border: 1px solid var(--color-border);
   background: var(--color-panel);
   padding: 1rem 1.2rem;
+  backdrop-filter: blur(10px);
 }
 
 .loaderTitle {
@@ -167,6 +168,7 @@
   border: 1px solid var(--color-border-soft);
   padding: 0.85rem 1rem;
   z-index: 20;
+  backdrop-filter: blur(10px);
 }
 
 /* ── Question badge ─────────────────────────────────── */
@@ -182,6 +184,7 @@
   pointer-events: none;
   white-space: nowrap;
   box-shadow: 0 0 24px rgba(77, 208, 225, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 .questionLabel {

@@ -15,7 +15,7 @@
   --color-muted: rgba(200, 231, 255, 0.35);
   --color-border: rgba(77, 208, 225, 0.32);
   --color-border-soft: rgba(77, 208, 225, 0.14);
-  --color-panel: rgba(5, 14, 28, 0.86);
+  --color-panel: rgba(5, 14, 28, 0.5);
   --font-mono: 'Share Tech Mono', 'VT323', 'Courier New', monospace;
   --font-title: 'Orbitron', 'Share Tech Mono', monospace;
 }
